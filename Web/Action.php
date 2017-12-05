@@ -25,6 +25,8 @@ class Action extends \yii\base\Action
      */
     protected $modelClass = null;
 
+    private $actionResult = null;
+
     /**
      * Runs this action with the specified parameters.
      * This method is mainly invoked by the controller.
@@ -48,15 +50,15 @@ class Action extends \yii\base\Action
             return $this->sendError($status);
         }
         try {
-            $result = $this->beforeRun();
-            if ($result !== true) {
-                return $this->sendError($result);
+            $this->actionResult = $this->beforeRun();
+            if ($this->actionResult !== true) {
+                return $this->sendError($this->actionResult);
             }
-            $result = call_user_func_array([
+            $this->actionResult = call_user_func_array([
                 $this,
                 'run'
             ], $args);
-            return $this->afterRun($result);
+            return $this->afterRun($this->actionResult);
         } catch (UserException $e) {
             $res = $this->sendErrorException($e);
             if ($res != false) {
@@ -116,10 +118,11 @@ class Action extends \yii\base\Action
     }
 
     /**
-     * This method is called right after `run()` is executed.
-     * You may override this method to do post-processing work for the action run.
+     * Undocumented function
+     *
+     * @return void
      */
-    protected function afterRun($result) {
-        return $result;
+    protected function afterRun() {
+        return $this->actionResult;
     }
 }
